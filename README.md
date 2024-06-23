@@ -1,5 +1,5 @@
-# myproject
-# Project 2 - Data Science Project (Data Processing)
+# Technology Innovation Project
+# Project 4 - Data Science Project (Data Processing)
 import os
 import numpy as np
 import pandas as pd
