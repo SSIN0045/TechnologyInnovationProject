@@ -26,42 +26,31 @@ print(os.listdir('/content/'))
 df = pd.read_csv('/content/fraudTest.csv', on_bad_lines='skip')
 df.info()
 
-# Display the data
+#Display the data
 df.head()
 
-# Sum the missing value
+df.describe()
+
+#Sum the missing value
 df.isnull().sum()
 
-## Data Processing 
-# Check if the index column exists and remove it
-import pandas as pd
+##Split the column trans_date_trans_time into 2 separate columns, including trans_date and trans_time
+df['trans_date'] = pd.to_datetime(df['trans_date_trans_time'], format='%Y-%m-%d %H:%M:%S').dt.date
+df['trans_time'] = pd.to_datetime(df['trans_date_trans_time'], format='%Y-%m-%d %H:%M:%S').dt.time
+df.info()
+
+# Remove the 'trans_date_trans_time' column
 # Check if the index column exists and remove it
 if 'Unnamed: 0' in df.columns:
     df.drop(columns=['Unnamed: 0'], inplace=True)
-df.columns[0]
+df.drop('trans_date_trans_time', axis=1, inplace=True)
 
-# Display the data before splitting the column
-print("Before splitting the column:")
-print(df.head())
-
-# Split 'trans_date_trans_time' into 'trans_date' and 'trans_time'
-df['trans_date'] = pd.to_datetime(df['trans_date_trans_time'], format='%d-%m-%Y %H:%M').dt.date
-df['trans_time'] = pd.to_datetime(df['trans_date_trans_time'], format='%d-%m-%Y %H:%M').dt.time
-
-# Drop the original 'trans_date_trans_time' column
-df.drop(columns=['trans_date_trans_time'], inplace=True)
-
-# Reorder columns to place 'trans_date' and 'trans_time' at the beginning
-columns_order = ['trans_date', 'trans_time'] + [col for col in df.columns if col not in ['trans_date', 'trans_time']]
-df = df[columns_order]
-# Display the data after splitting the column
-print("\nAfter splitting the column:")
-
-# Convert 'amt' to integer
-df['amt'] = df['amt'].astype(int)
+# Reorder the columns to have 'trans_date' first and 'trans_time' second
+columns = ['trans_date', 'trans_time'] + [col for col in df.columns if col not in ['trans_date', 'trans_time']]
+df = df[columns]
 
 # Convert 'dob' to datetime
-df['dob'] = pd.to_datetime(df['dob'], format='%d-%m-%Y')
+df['dob'] = pd.to_datetime(df['dob'], format='%Y-%m-%d')
 
 # Convert 'trans_time' to time
 df['trans_time'] = pd.to_datetime(df['trans_time'], format='%H:%M:%S').dt.time
@@ -73,4 +62,3 @@ df['trans_date'] = pd.to_datetime(df['trans_date']).dt.date
 print("\nData types of the columns:")
 print(df.dtypes)
 
-print(df.head())
