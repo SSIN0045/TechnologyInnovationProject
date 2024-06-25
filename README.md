@@ -62,3 +62,46 @@ df['trans_date'] = pd.to_datetime(df['trans_date']).dt.date
 print("\nData types of the columns:")
 print(df.dtypes)
 
+## Exploratory Data Analysis
+## the maximum transaction that are fraudelent happen between midnight and early morning hours.
+
+plt.figure(figsize=(14, 8))
+# Filter for transactions where is_fraud is 1
+df_fraud = df[df['is_fraud'] == 1]
+
+# Print columns of df_fraud to check column names and existence
+print(df_fraud.columns)
+
+# Extract hour from trans_date_trans_time as an example (if it contains time information)
+df_fraud['hour'] = pd.to_datetime(df_fraud['trans_date_trans_time']).dt.hour
+
+# Plot histogram
+sns.histplot(data=df_fraud, x='hour', bins=24)
+plt.title('Fraudulent Transactions Over Time')
+plt.xlabel('Hour of Day')
+plt.ylabel('Count')
+plt.show()
+
+# Distribution of transaction amount
+plt.figure(figsize=(10, 6))
+hist_plot = sns.histplot(df['amt'], bins=50, kde=True)
+plt.title('Distribution of Transaction Amount')
+plt.xlabel('Transaction Amount')
+plt.ylabel('Frequency')
+
+# Adding data annotations
+counts, bins = np.histogram(df['amt'], bins=50)
+for count, bin_edge in zip(counts, bins):
+    if count > 0:  # Only annotate bins with non-zero counts
+        plt.text(bin_edge + (bins[1] - bins[0]) / 2, count, str(count), ha='center', va='bottom', fontsize=8)
+
+plt.show()
+
+# Time-based analysis - transactions over time
+plt.figure(figsize=(14, 8))
+df['hour'] = df['trans_time'].apply(lambda x: x.hour)
+sns.histplot(data=df, x='hour', hue='is_fraud', multiple='stack', bins=24)
+plt.title('Transactions Over Time')
+plt.xlabel('Hour of Day')
+plt.ylabel('Count')
+plt.show()
