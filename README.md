@@ -19,11 +19,8 @@ from sklearn.preprocessing import StandardScaler
 import pylab
 import datetime
 
-# Import the data from fraud_data.csv.
-print(os.listdir('/content/'))
-
 #Load the dataset
-df = pd.read_csv('/content/fraudTest.csv', on_bad_lines='skip')
+df = pd.read_csv('C:/Users/singh/Desktop/TIP_2/fraudTest.csv', on_bad_lines='skip')
 df.info()
 
 #Display the data
@@ -33,37 +30,23 @@ df.describe()
 
 #Sum the missing value
 df.isnull().sum()
+# Split the 'trans_date_trans_time' into 'trans_date' and 'trans_time'
+df['trans_date'] = pd.to_datetime(df['trans_date_trans_time'], format='%d-%m-%Y %H:%M').dt.date
+df['trans_time'] = pd.to_datetime(df['trans_date_trans_time'], format='%d-%m-%Y %H:%M').dt.time
 
-##Split the column trans_date_trans_time into 2 separate columns, including trans_date and trans_time
-df['trans_date'] = pd.to_datetime(df['trans_date_trans_time'], format='%Y-%m-%d %H:%M:%S').dt.date
-df['trans_time'] = pd.to_datetime(df['trans_date_trans_time'], format='%Y-%m-%d %H:%M:%S').dt.time
-df.info()
-
-# Remove the 'trans_date_trans_time' column
-# Check if the index column exists and remove it
-if 'Unnamed: 0' in df.columns:
-    df.drop(columns=['Unnamed: 0'], inplace=True)
-df.drop('trans_date_trans_time', axis=1, inplace=True)
+# Remove the 'trans_date_trans_time' column and 'Unnamed: 0' if it exists
+df.drop(columns=['trans_date_trans_time', 'Unnamed: 0'], errors='ignore', inplace=True)
 
 # Reorder the columns to have 'trans_date' first and 'trans_time' second
 columns = ['trans_date', 'trans_time'] + [col for col in df.columns if col not in ['trans_date', 'trans_time']]
 df = df[columns]
 
 # Convert 'dob' to datetime
-df['dob'] = pd.to_datetime(df['dob'], format='%Y-%m-%d')
-
-# Convert 'trans_time' to time
-df['trans_time'] = pd.to_datetime(df['trans_time'], format='%H:%M:%S').dt.time
-
-# Convert 'trans_date' to date
-df['trans_date'] = pd.to_datetime(df['trans_date']).dt.date
+df['dob'] = pd.to_datetime(df['dob'], format='%d-%m-%Y')
 
 # Check the data types
 print("\nData types of the columns:")
 print(df.dtypes)
-
-## Exploratory Data Analysis
-## the maximum transaction that are fraudelent happen between midnight and early morning hours.
 
 plt.figure(figsize=(14, 8))
 # Filter for transactions where is_fraud is 1
@@ -72,14 +55,60 @@ df_fraud = df[df['is_fraud'] == 1]
 # Print columns of df_fraud to check column names and existence
 print(df_fraud.columns)
 
-# Extract hour from trans_date_trans_time as an example (if it contains time information)
-df_fraud['hour'] = pd.to_datetime(df_fraud['trans_date_trans_time']).dt.hour
+# Extract hour from trans_time
+df['trans_time'] = pd.to_datetime(df['trans_time'], format='%H:%M:%S')
+df['hour'] = df['trans_time'].dt.hour
+
+# Filter for transactions where is_fraud is 1
+df_fraud = df[df['is_fraud'] == 1]
 
 # Plot histogram
+plt.figure(figsize=(14, 8))
 sns.histplot(data=df_fraud, x='hour', bins=24)
 plt.title('Fraudulent Transactions Over Time')
 plt.xlabel('Hour of Day')
 plt.ylabel('Count')
+plt.show()
+
+# Load the dataset again for geographical analysis
+df = pd.read_csv("C:/Users/singh/Desktop/TIP_2/fraudTest.csv")
+
+# Plot geographical distribution
+plt.figure(figsize=(14, 10))
+sns.scatterplot(x='long', y='lat', hue='is_fraud', palette=['blue', 'red'], data=df)
+plt.title('Geographical Distribution of Transactions')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.legend(title='Fraudulent (1) / Non-Fraudulent (0)')
+plt.show()
+# Plot State-wise Distribution of Fraudulent Transactions
+plt.figure(figsize=(14, 10))
+sns.countplot(y='state', hue='is_fraud', palette=['blue', 'red'], data=df, order=df['state'].value_counts().index)
+plt.title('State-wise Distribution of Fraudulent Transactions')
+plt.xlabel('Count')
+plt.ylabel('State')
+plt.legend(title='Fraudulent (1) / Non-Fraudulent (0)')
+plt.show()
+
+
+## Transactio Amount vs Age with Fraud indicator
+# Load the dataset
+df = pd.read_csv('C:/Users/singh/Desktop/TIP_2/fraudTest.csv', on_bad_lines='skip')
+
+# Convert 'trans_date_trans_time' to datetime
+df['trans_date_trans_time'] = pd.to_datetime(df['trans_date_trans_time'], format='%d-%m-%Y %H:%M')
+
+# Calculate age from 'dob'
+df['dob'] = pd.to_datetime(df['dob'], format='%d-%m-%Y', errors='coerce')
+df['age'] = df['trans_date_trans_time'].dt.year - df['dob'].dt.year
+
+# Plot Transaction Amount vs. Age with Fraud Indicator
+plt.figure(figsize=(14, 8))
+sns.scatterplot(x='age', y='amt', hue='is_fraud', palette=['blue', 'red'], data=df)
+plt.title('Transaction Amount vs. Age with Fraud Indicator')
+plt.xlabel('Age')
+plt.ylabel('Transaction Amount')
+plt.legend(title='Fraudulent (1) / Non-Fraudulent (0)')
 plt.show()
 
 # Distribution of transaction amount
@@ -99,7 +128,6 @@ plt.show()
 
 # Time-based analysis - transactions over time
 plt.figure(figsize=(14, 8))
-df['hour'] = df['trans_time'].apply(lambda x: x.hour)
 sns.histplot(data=df, x='hour', hue='is_fraud', multiple='stack', bins=24)
 plt.title('Transactions Over Time')
 plt.xlabel('Hour of Day')
