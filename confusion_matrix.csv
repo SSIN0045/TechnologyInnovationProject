@@ -1,3 +1,5 @@
-,Predicted Negative,Predicted Positive
-Actual Negative,448,4
-Actual Positive,58,348
+Columns,Values
+Actual Negative Predicted Negative,448
+Actual Positive Predicted Negative,58
+Actual Negative Predicted Positive,4
+Actual Positive Predicted Negative,348
