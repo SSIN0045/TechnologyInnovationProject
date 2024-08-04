@@ -1,5 +1,5 @@
 Columns,Values
-Actual Negative Predicted Negative,448
-Actual Positive Predicted Negative,58
-Actual Negative Predicted Positive,4
-Actual Positive Predicted Negative,348
+Actual Negative Predicted Negative (TP),448
+Actual Positive Predicted Negative (FN),58
+Actual Negative Predicted Positive (FP),4
+Actual Positive Predicted Positive (TN) ,348
