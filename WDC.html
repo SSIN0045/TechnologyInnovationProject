@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV WDC</title>
+    <script src="https://tableau.github.io/webdataconnector/lib/tableauwdc-2.3.0.js"></script>
+</head>
+<body>
+    <h1>CSV Web Data Connector</h1>
+    <button id="submitButton">Get Data</button>
+    <script>
+        tableau.registerConnector({
+            getSchema: function (schemaCallback) {
+                var cols = [
+                    { id: "column1", alias: "Column 1", dataType: tableau.dataTypeEnum.string },
+                    { id: "column2", alias: "Column 2", dataType: tableau.dataTypeEnum.number }
+                ];
+
+                var tableSchema = {
+                    id: "csvData",
+                    alias: "CSV Data",
+                    columns: cols
+                };
+
+                schemaCallback([tableSchema]);
+            },
+            getData: function (table, doneCallback) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://raw.githubusercontent.com/SSIN0045/TechnologyInnovationProject/Sarah/model_performance_v2.csv', true);
+                xhr.onload = function () {
+                    var data = xhr.responseText.split('\n').map(row => row.split(','));
+                    var headers = data[0];
+                    var rows = data.slice(1).map(row => {
+                        var obj = {};
+                        row.forEach((value, index) => {
+                            obj[headers[index]] = value;
+                        });
+                        return obj;
+                    });
+
+                    table.appendRows(rows);
+                    doneCallback();
+                };
+                xhr.send();
+            }
+        });
+
+        document.getElementById('submitButton').addEventListener('click', function () {
+            tableau.connectionName = "CSV Data";
+            tableau.submit();
+        });
+    </script>
+</body>
+</html>
