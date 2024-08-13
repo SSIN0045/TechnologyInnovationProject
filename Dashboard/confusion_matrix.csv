@@ -1,3 +1,4 @@
-,Not Fraud,Fraud
-Not Fraud,155728,10348
-Fraud,23,617
+Actual Negative Predicted Negative,155728
+Actual Negative Predicted Positive,10348
+Actual Positive Predicted Negative,23
+Actual Positive Predicted Positive,617
